@@ -1,7 +1,0 @@
-Async FastAPI
-PostgreSQL
-SQLAlchemy async
-Redis cache
-Celery/RQ background jobs
-Pagination
-Bulk insert/update
