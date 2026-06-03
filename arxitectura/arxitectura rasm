@@ -1,0 +1,6 @@
+1. User rasm tanlaydi
+2. Frontend rasmni siqadi: 2–5 MB dan 300–800 KB gacha
+3. Backend presigned upload URL beradi
+4. Rasm to‘g‘ridan-to‘g‘ri S3/MinIO ga yuklanadi
+5. Backendga faqat file_url saqlanadi
+6. Background worker thumbnail qiladi
