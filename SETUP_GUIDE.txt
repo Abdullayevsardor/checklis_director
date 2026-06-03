@@ -1,0 +1,152 @@
+🔧 LOYIHA ISHGA TUSHIRISH UCHUN
+═══════════════════════════════════════════════════════════════════════════
+
+1️⃣  LOCALHOST HOSTNAMEINI TO'G'RI SOZLASH (MUHIM!)
+───────────────────────────────────────────────────────
+
+Windows:
+  1. C:\Windows\System32\drivers\etc\hosts ni admin sifatida oching
+  2. Qo'shing yoki tekshiring:
+     127.0.0.1 localhost
+  3. Sохraнить va saqlash
+  4. Command Prompt (admin): ipconfig /flushdns
+  5. Tekshirish: ping localhost → javob: 127.0.0.1
+
+Mac/Linux:
+  1. Terminal oching
+  2. sudo nano /etc/hosts
+  3. Qo'shing yoki tekshiring:
+     127.0.0.1 localhost
+  4. Ctrl+X → Y → Enter
+  5. Tekshirish: ping localhost
+
+───────────────────────────────────────────────────────
+
+2️⃣  BACKEND ISHGA TUSHIRISH
+───────────────────────────────────────────────────────
+
+Terminal 1 (Backend):
+
+  cd c:\Users\User\Downloads\cheklist_for_director
+  .\venv\Scripts\Activate.ps1
+  
+  # Environment variables o'rnatish (opsional, default OK)
+  $env:RP_ID = "localhost"
+  $env:ORIGIN = "http://localhost:5173"
+  $env:DATABASE_URL = "postgresql+asyncpg://user:password@localhost/dbname"
+  
+  # Backend ishga tushirish
+  uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+  
+  ✓ Kutmoqda: http://127.0.0.1:8000
+
+───────────────────────────────────────────────────────
+
+3️⃣  FRONTEND ISHGA TUSHIRISH
+───────────────────────────────────────────────────────
+
+Terminal 2 (Frontend):
+
+  cd c:\Users\User\Downloads\cheklist_for_director\checklist-frontend
+  npm run dev
+  
+  ✓ Kutmoqda: http://localhost:5173
+
+───────────────────────────────────────────────────────
+
+4️⃣  BRAUZERDA OCHISH
+───────────────────────────────────────────────────────
+
+Chrome/Edge/Safari oching:
+
+  🔗 URL BAR'GA: http://localhost:5173
+  
+  ⚠️  MUHIM: "127.0.0.1" O'RNIGA "localhost" ISHLATISH!
+
+───────────────────────────────────────────────────────
+
+5️⃣  FACE ID TEST QILISH
+───────────────────────────────────────────────────────
+
+LoginPage'da:
+  1. "Face ID" tabini tanlash
+  2. "Face IDni boshlash" tugmasini bosgani
+  3. Telefon/Kompyuter yuzni taniy → Face ID rasm skanerlaydi
+  4. Muvaffaqiyatli bo'lsa → Dashboard'ga kiritiladi
+
+───────────────────────────────────────────────────────
+
+6️⃣  DEBUGGING (AGAR ERROR BO'LSA)
+───────────────────────────────────────────────────────
+
+Browser Console'da (F12):
+
+  // Test setup
+  import("/src/utils/faceIdDebug.js").then(() => {
+    window.testFaceIdSetup();
+  });
+  
+  // Hostnameni tekshirish
+  console.log("Hostname:", window.location.hostname);
+  console.log("Origin:", window.location.origin);
+  
+  // WebAuthn qo'llab-quvvatlari
+  console.log("WebAuthn:", !!window.PublicKeyCredential);
+  
+  // Platform authenticator
+  PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+    .then(a => console.log("Platform auth:", a));
+
+───────────────────────────────────────────────────────
+
+7️⃣  ADMIN USERS (READY)
+───────────────────────────────────────────────────────
+
+Face ID uchun ruxsat etilgan 3 ta admin:
+
+  1. Sardor
+     • Username: sardor
+     • Password: Sardor@2026
+     • Role: admin
+     • Face ID: ENABLED ✓
+
+  2. Anton
+     • Username: anton
+     • Password: Anton@2026
+     • Role: admin
+     • Face ID: ENABLED ✓
+
+  3. Asliddin
+     • Username: asliddin
+     • Password: Asliddin@2026
+     • Role: admin
+     • Face ID: ENABLED ✓
+
+───────────────────────────────────────────────────────
+
+8️⃣  XATOLIKKA QAQA CHIQSA
+───────────────────────────────────────────────────────
+
+ERROR: "The operation either timed out or was not allowed"
+
+✓ Qadamlar:
+  1. http://localhost:5173 dan ochish (127.0.0.1 EMAS!)
+  2. Browser cache o'chirish (Ctrl+Shift+Delete)
+  3. Backend + Frontend serverlarini qayta ishga tushirish
+  4. F12 console'da debug komandalarni ishga tushirish
+  5. Platform authenticator mavjudligini tekshirish (Face ID/Fingerprint)
+
+Toliq guide: WEBAUTHN_TROUBLESHOOTING.md
+
+───────────────────────────────────────────────────────
+
+✨ HARAKAT:
+  
+  1. Localhost hostname sozlash ✓
+  2. Backend ishga tushirish (port 8000) ✓
+  3. Frontend ishga tushirish (port 5173) ✓
+  4. Browser: http://localhost:5173 ✓
+  5. Face ID tab → "Face IDni boshlash" ✓
+  6. Yuzni skanerla → Dashboard ✓
+
+═══════════════════════════════════════════════════════════════════════════

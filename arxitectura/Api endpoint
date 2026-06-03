@@ -1,0 +1,15 @@
+POST /auth/login
+
+GET /branches
+GET /checklist/template
+
+POST /shift-checks/start
+GET /shift-checks/{id}
+POST /shift-checks/{id}/save
+POST /shift-checks/{id}/submit
+
+POST /uploads/presigned-url
+POST /answers/{answer_id}/photos
+
+GET /reports/shift-checks
+GET /reports/shift-checks/{id}
