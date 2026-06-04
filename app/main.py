@@ -23,12 +23,14 @@ app = FastAPI(
 if os.path.exists("media"):
     app.mount("/media", StaticFiles(directory="media"), name="media")
 
+frontend_origin = os.getenv("ORIGIN", "http://localhost:5173")
+allow_origins = [frontend_origin]
+if "http://127.0.0.1:5173" not in allow_origins:
+    allow_origins.append("http://127.0.0.1:5173")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
