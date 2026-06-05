@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "checklist-frontend/Dockerfile",
+    "context": "checklist-frontend"
+  },
+  "deploy": {
+    "startCommand": "nginx -g 'daemon off;'",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
