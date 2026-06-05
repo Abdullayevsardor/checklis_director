@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG,
-    docs_url="/"
+    # docs_url="/"
 )
 
 if os.path.exists("media"):
