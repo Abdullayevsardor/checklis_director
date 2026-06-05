@@ -1,33 +1,16 @@
-# 1-Bosqich: Loyihani build qilish (Yig'ish)
+# 1-Bosqich: Loyihani yig'ish (Build)
 FROM node:20-alpine AS builder
-
 WORKDIR /app
-
-# Birinchi dependencies (kutubxonalar) yuklanadi (keshlash samarali bo'lishi uchun)
 COPY package*.json ./
 RUN npm ci
-
-# Docker-compose'dan kelayotgan argumentni qabul qilamiz
-ARG VITE_API_BASE_URL
-# Vite muhit o'zgaruvchisini o'rnatamiz (Build vaqtida kod ichiga joylashadi)
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
-
-# Qolgan barcha kodlarni nusxalash va build qilish
 COPY . .
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
-# 2-Bosqich: Faqat tayyor build fayllarini ishga tushirish (Production)
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Faqat ishga tushirish uchun kerakli vositani o'rnatamiz
-RUN npm install -g preview
-
-# 1-bosqichda tayyor bo'lgan 'dist' papkasini nusxalaymiz
-COPY --from=builder /app/dist ./dist
-
-EXPOSE 4173
-
-# docker-compose'dagi 4173 portga moslab hostni ochgan holda ishga tushiramiz
-CMD ["preview", "--host", "0.0.0.0", "--port", "4173"]
+# 2-Bosqich: Nginx orqali ishga tushirish (Eng barqaror usul)
+FROM nginx:alpine
+# Yig'ilgan tayyor fayllarni Nginx veb-server papkasiga nusxalash
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

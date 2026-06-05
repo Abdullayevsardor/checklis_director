@@ -1,14 +1,14 @@
 import asyncio
-
 from app.core.database import AsyncSessionLocal
 from app.core.security import hash_password
 from app.modules.users.models import User
+from sqlalchemy import insert, update, select
 
-
-def print_help():
-    print("Usage: python create_admin_user.py")
-    print("Then follow the prompts to create or update the admin account.")
-
+# Barcha modellarni avtomatik ro'yxatdan o'tkazish uchun asosiy ilovani chaqiramiz
+try:
+    import app.main
+except ImportError:
+    pass
 
 async def create_admin():
     username = input("Admin username: ").strip()
@@ -21,46 +21,50 @@ async def create_admin():
         print("Error: Passwords do not match.")
         return
 
-    async with AsyncSessionLocal() as db:
-        stmt = await db.execute(
-            User.__table__.select().where(User.username == username)
-        )
-        existing = stmt.first()
+    hashed = hash_password(password)
 
-        if existing:
-            user_id = existing[0]
-            user = await db.get(User, user_id)
-            user.full_name = full_name or user.full_name
-            user.phone = email or user.phone
-            user.hashed_password = hash_password(password)
-            user.role = "admin"
-            user.branch_id = None
-            user.is_active = True
-            db.add(user)
+    async with AsyncSessionLocal() as db:
+        # Foydalanuvchi borligini tekshirish
+        stmt = select(User.id).where(User.username == username)
+        result = await db.execute(stmt)
+        existing_id = result.scalar_one_or_none()
+
+        if existing_id:
+            # Mavjud bo'lsa, obyekt munosabatlariga tegmasdan to'g'ridan-to'g'ri yangilaymiz
+            upd_stmt = (
+                update(User)
+                .where(User.id == existing_id)
+                .values(
+                    full_name=full_name or User.full_name,
+                    phone=email or User.phone,
+                    hashed_password=hashed,
+                    role="admin",
+                    branch_id=None,
+                    is_active=True
+                )
+            )
+            await db.execute(upd_stmt)
             await db.commit()
-            await db.refresh(user)
-            print(f"Updated existing admin user: {user.username} (id={user.id})")
+            print(f"Updated existing admin user: {username}")
         else:
-            user = User(
+            # Yangi bo'lsa, munosabatlarni aylanib o'tib jadval darajasida yozamiz
+            ins_stmt = insert(User.__table__).values(
                 full_name=full_name,
                 username=username,
                 phone=email,
-                hashed_password=hash_password(password),
+                hashed_password=hashed,
                 role="admin",
                 branch_id=None,
-                is_active=True,
+                is_active=True
             )
-            db.add(user)
+            await db.execute(ins_stmt)
             await db.commit()
-            await db.refresh(user)
-            print(f"Created admin user: {user.username} (id={user.id})")
+            print(f"Created admin user: {username}")
 
         print("\nAdmin credentials:")
-        print(f"  username: {user.username}")
+        print(f"  username: {username}")
         print(f"  password: {password}")
         print("  role: admin")
-        print("  branch_id: None")
-
 
 if __name__ == "__main__":
     asyncio.run(create_admin())
