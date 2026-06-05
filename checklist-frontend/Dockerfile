@@ -1,10 +1,12 @@
 # 1-Bosqich: Loyihani yig'ish (Build)
 FROM node:20-alpine AS builder
 WORKDIR /app
-# Docker'ga fayllar qayerda turganini aniq ko'rsatamiz
-COPY checklist-frontend/package*.json ./
+
+# Fayllarni nusxalash (Muammoli yo'llar olib tashlandi)
+COPY package*.json ./
 RUN npm install
-COPY checklist-frontend/ .
+COPY . .
+
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
