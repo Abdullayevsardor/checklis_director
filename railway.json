@@ -2,7 +2,7 @@
   "$schema": "https://railway.com",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "checklist-frontend/Dockerfile",
+    "dockerfilePath": "Dockerfile",
     "context": "checklist-frontend"
   },
   "deploy": {
