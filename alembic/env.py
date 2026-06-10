@@ -21,13 +21,10 @@ if config.config_file_name is not None:
 
 # env.py ichidagi get_url funksiyasini toping va xuddi shu ko'rinishga keltiring:
 def get_url():
-    # .env yoki alembic.ini dagi hamma narsani chetlab o'tib, docker-compose dagi postgres xizmatiga ulanadi
-    user = "checklist"
-    password = "password"
-    db = "checklist"
-    host = "postgres"  # Docker-compose dagi xizmat nomi
-    return f"postgresql+asyncpg://{user}:{password}@{host}:5432/{db}"
-
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        raise RuntimeError("DATABASE_URL environment variable is not set")
+    return url
 
 def run_migrations_offline() -> None:
     """Migrations in 'offline' mode."""
