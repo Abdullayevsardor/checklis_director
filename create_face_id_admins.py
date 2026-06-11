@@ -24,8 +24,8 @@ async def create_face_id_admins():
             "password": "Anton@2026"
         },
         {
-            "full_name": "Asliddin",
-            "username": "asliddin",
+            "full_name": "A.Ruzikulov",
+            "username": "a.ruzikulov",
             "phone": "+998903456789",
             "password": "a.ruzikulov@maxway.uz"
         }

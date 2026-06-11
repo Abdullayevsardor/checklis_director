@@ -32,7 +32,7 @@ async def check_admins():
         
         # ALLOWED_ADMINS ro'yxatini tekshirish
         print("\n🔍 Face ID UCHUN RUXSAT ETILGAN ADMIN'LAR:")
-        ALLOWED_ADMINS = ["Sardor", "Anton", "Asliddin"]
+        ALLOWED_ADMINS = ["Sardor", "Anton", "A.Ruzikulov"]
         
         for name in ALLOWED_ADMINS:
             result = await session.execute(
