@@ -10,8 +10,18 @@ from app.core.config import (
 )
 
 
+# async def request_workly_token(data: dict[str, str]) -> str:
+#     url = f"{WORKLY_BASE_URL}"
+
+#     async with httpx.AsyncClient() as client:
+#         response = await client.post(url, data=data, timeout=60)
+
+#     response.raise_for_status()
+#     token_data = response.json()
+#     return token_data["access_token"]
+
 async def request_workly_token(data: dict[str, str]) -> str:
-    url = f"{WORKLY_BASE_URL}"
+    url = f"{WORKLY_BASE_URL}/oauth/token"
 
     async with httpx.AsyncClient() as client:
         response = await client.post(url, data=data, timeout=60)
