@@ -20,7 +20,7 @@ from app.modules.workly.tasks import auto_sync_workly_employees
 app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG,
-    # docs_url="/"
+    docs_url="/"
 )
 
 
