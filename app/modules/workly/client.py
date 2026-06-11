@@ -24,7 +24,14 @@ async def request_workly_token(data: dict[str, str]) -> str:
     url = "https://api.workly.io/v1/oauth/token"
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, data=data, timeout=60)
+        response = await client.post(
+            url,
+            json=data,
+            timeout=60,
+        )
+
+    print("TOKEN STATUS:", response.status_code)
+    print("TOKEN RESPONSE:", response.text)
 
     response.raise_for_status()
     token_data = response.json()
