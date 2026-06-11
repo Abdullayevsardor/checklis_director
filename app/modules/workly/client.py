@@ -21,7 +21,7 @@ from app.core.config import (
 #     return token_data["access_token"]
 
 async def request_workly_token(data: dict[str, str]) -> str:
-    url = f"{WORKLY_BASE_URL}/oauth/token"
+    url = "https://api.workly.io/v1/oauth/token"
 
     async with httpx.AsyncClient() as client:
         response = await client.post(url, data=data, timeout=60)
