@@ -13,12 +13,32 @@ from app.modules.uploads.router import router as uploads_router
 from app.modules.reports.router import router as reports_router
 from app.modules.admin.router import router as admin_router
 from fastapi.staticfiles import StaticFiles
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.modules.workly.tasks import auto_sync_workly_employees
+
 
 app = FastAPI(
     title=settings.APP_NAME,
     debug=settings.DEBUG,
     # docs_url="/"
 )
+
+
+scheduler = AsyncIOScheduler()
+
+
+@app.on_event("startup")
+async def start_scheduler():
+    scheduler.add_job(
+        auto_sync_workly_employees,
+        "interval",
+        hours=24,
+        id="workly_auto_sync",
+        replace_existing=True,
+    )
+    scheduler.start()
+    print("WORKLY AUTO SYNC SCHEDULER STARTED")
+
 
 if os.path.exists("media"):
     app.mount("/media", StaticFiles(directory="media"), name="media")
