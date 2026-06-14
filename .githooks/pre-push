@@ -1,0 +1,11 @@
+#!/bin/sh
+# Run backend tests before allowing push
+echo "Running backend tests (pytest)..."
+pytest -q
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Tests failed. Push aborted. Fix tests before pushing."
+  exit $status
+fi
+echo "Tests passed. Proceeding with push."
+exit 0

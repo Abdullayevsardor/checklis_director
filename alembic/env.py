@@ -1,15 +1,22 @@
-import asyncio
+import sys
 import os
+import asyncio
 from logging.config import fileConfig
+
+# 1. Windows tizimidagi soket (WinError 64) asinxron xatolarini tuzatish
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+# 2. Python loyiha yo'lini topishi uchun ildiz (root) papkani tizimga qo'shamiz
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-# 1. Base model import
+# 3. Base model import (To'g'ri manzil ko'rsatildi)
 try:
-    from app.database import Base
-
+    from app.core.database import Base
     target_metadata = Base.metadata
 except ImportError:
     target_metadata = None
@@ -19,12 +26,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# env.py ichidagi get_url funksiyasini toping va xuddi shu ko'rinishga keltiring:
+# 4. Dinamik va xavfsiz URL olish funksiyasi
 def get_url():
-    url = os.getenv("DATABASE_URL")
-    if not url:
-        raise RuntimeError("DATABASE_URL environment variable is not set")
-    return url
+    from app.core.config import settings
+    return settings.DATABASE_URL
 
 def run_migrations_offline() -> None:
     """Migrations in 'offline' mode."""
@@ -39,13 +44,11 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
-
-# Asinxron ulanish qismi (MissingGreenlet xatosini yo'qotadi)
+# Asinxron ulanish qismi
 def do_run_migrations(connection):
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()
-
 
 async def run_migrations_online() -> None:
     """Migrations in 'online' mode."""
@@ -62,7 +65,6 @@ async def run_migrations_online() -> None:
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()
-
 
 if context.is_offline_mode():
     run_migrations_offline()

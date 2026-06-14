@@ -21,12 +21,12 @@ from app.core.config import (
 #     return token_data["access_token"]
 
 async def request_workly_token(data: dict[str, str]) -> str:
-    url = "https://api.workly.io/v1/oauth/token"
+    url = f"{WORKLY_BASE_URL}/v1/oauth/token"
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
             url,
-            json=data,
+            data=data,
             timeout=60,
         )
 
@@ -39,9 +39,6 @@ async def request_workly_token(data: dict[str, str]) -> str:
 
 
 async def get_workly_token():
-    if WORKLY_ACCESS_TOKEN:
-        return WORKLY_ACCESS_TOKEN
-
     if WORKLY_REFRESH_TOKEN:
         data = {
             "grant_type": "refresh_token",
@@ -52,6 +49,9 @@ async def get_workly_token():
         if WORKLY_CLIENT_SECRET:
             data["client_secret"] = WORKLY_CLIENT_SECRET
         return await request_workly_token(data)
+
+    if WORKLY_ACCESS_TOKEN:
+        return WORKLY_ACCESS_TOKEN
 
     if WORKLY_USERNAME and WORKLY_PASSWORD:
         data = {
@@ -91,13 +91,20 @@ async def get_workly_employees():
 
             url = f"{WORKLY_BASE_URL}/v1/employees?page={page}"
 
-            # print("REQUEST:", url)
-
             response = await client.get(
                 url,
                 headers=headers,
                 timeout=60,
             )
+
+            if response.status_code == 401:
+                token = await get_workly_token()
+                headers["Authorization"] = f"Bearer {token}"
+                response = await client.get(
+                    url,
+                    headers=headers,
+                    timeout=60,
+                )
 
             response.raise_for_status()
 

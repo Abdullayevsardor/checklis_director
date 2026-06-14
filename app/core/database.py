@@ -1,6 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
+import os
+
+# Agar lokalda bo'lsa, SSL ni butunlay o'chiramiz
+connect_args = {}
+if "RAILWAY_ENVIRONMENT" not in os.environ:
+    connect_args = {
+        "ssl": False  # Lokal bazaga oddiy (SSL siz) ulanishni majburlaydi
+    }
 
  
 engine = create_async_engine(
@@ -9,6 +17,8 @@ engine = create_async_engine(
     pool_size=10,
     max_overflow=20,
     pool_pre_ping=True,
+    connect_args=connect_args # Shuni qo'shing
+
 )
 
 AsyncSessionLocal = async_sessionmaker(
