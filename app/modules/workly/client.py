@@ -39,20 +39,13 @@ async def request_workly_token(data: dict[str, str]) -> str:
 
 
 async def get_workly_token():
-    if WORKLY_REFRESH_TOKEN:
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": WORKLY_REFRESH_TOKEN,
-        }
-        if WORKLY_CLIENT_ID:
-            data["client_id"] = WORKLY_CLIENT_ID
-        if WORKLY_CLIENT_SECRET:
-            data["client_secret"] = WORKLY_CLIENT_SECRET
-        return await request_workly_token(data)
-
-    if WORKLY_ACCESS_TOKEN:
-        return WORKLY_ACCESS_TOKEN
-
+    print("CREDS CHECK:",
+          "username=", bool(WORKLY_USERNAME),
+          "password=", bool(WORKLY_PASSWORD),
+          "refresh=", bool(WORKLY_REFRESH_TOKEN),
+          "client_id=", bool(WORKLY_CLIENT_ID),
+          "client_secret=", bool(WORKLY_CLIENT_SECRET))
+    # Try password grant first (most reliable for user credentials)
     if WORKLY_USERNAME and WORKLY_PASSWORD:
         data = {
             "grant_type": "password",
@@ -63,8 +56,39 @@ async def get_workly_token():
             data["client_id"] = WORKLY_CLIENT_ID
         if WORKLY_CLIENT_SECRET:
             data["client_secret"] = WORKLY_CLIENT_SECRET
-        return await request_workly_token(data)
+        try:
+            return await request_workly_token(data)
+        except Exception as e:
+            print(f"Password grant failed: {e}. Trying refresh token...")
 
+    # Try refresh token second
+    if WORKLY_REFRESH_TOKEN:
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": WORKLY_REFRESH_TOKEN,
+        }
+        # Fall back to client credentials
+        if WORKLY_CLIENT_ID and WORKLY_CLIENT_SECRET:
+            data = {
+                "grant_type": "client_credentials",
+                "client_id": WORKLY_CLIENT_ID,
+                "client_secret": WORKLY_CLIENT_SECRET,
+            }
+            try:
+                return await request_workly_token(data)
+            except Exception as e:
+                print(f"Client credentials failed: {e}")
+
+        raise RuntimeError(
+            "Workly token olinmadi — barcha usullar muvaffaqiyatsiz. "
+            "WORKLY_USERNAME/WORKLY_PASSWORD to'g'ri o'rnatilganini tekshiring."
+        )
+
+    # Try static access token
+    if WORKLY_ACCESS_TOKEN:
+        return WORKLY_ACCESS_TOKEN
+
+    # Fall back to client credentials
     data = {
         "grant_type": "client_credentials",
         "client_id": WORKLY_CLIENT_ID,
