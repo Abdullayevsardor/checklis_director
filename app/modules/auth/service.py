@@ -45,60 +45,109 @@ def get_branch_password(branch_id: int) -> str | None:
 
 
  
-async def authenticate_user(
-    db: AsyncSession,
-    password: str,
-    branch_id: int | None = None,
-    username: str | None = None,
-) -> User | None:
-    """Admin login (parol orqali kimligini avtomat aniqlash) va Director login."""
+# async def authenticate_user(
     
-    # 1. ADMIN LOGINI (Branch ID 0 bo'lsa yoki frontenddan so'rov kelganda)
+#     db: AsyncSession,
+#     password: str,
+#     branch_id: int | None = None,
+#     username: str | None = None,
+# ) -> User | None:
+#     """Admin login (parol orqali kimligini avtomat aniqlash) va Director login."""
+    
+#     # 1. ADMIN LOGINI (Branch ID 0 bo'lsa yoki frontenddan so'rov kelganda)
+#     if branch_id == 0 or username:
+#         # Bazadan barcha faol adminlarni yuklab olamiz
+#         stmt = select(User).options(selectinload(User.branch)).where(
+#             (User.role == "admin") & (User.is_active == True)
+#         )
+#         result = await db.execute(stmt)
+#         admins = result.scalars().all()
+
+#         # Har bir adminning parolini kiritilgan parol bilan solishtiramiz
+#         for admin in admins:
+#             if verify_password(password, admin.hashed_password):
+#                 return admin  # To'g'ri kelgan birinchi adminni (Sardor, Anton yoki Asliddin) qaytaramiz
+        
+#         return None  # Hech biri to'g'ri kelmasa
+
+#     # 2. DIRECTOR / MANAGER LOGINI (Branch bo'yicha)
+#     if branch_id is None:
+#         return None
+
+#     expected_password = get_branch_password(branch_id)
+#     if expected_password is None or password != expected_password:
+#         return None
+
+#     result = await db.execute(
+#         select(User)
+#         .options(selectinload(User.branch))
+#         .where(
+#             (User.branch_id == branch_id) &
+#             (User.role.in_(["director", "manager", "admin"])) &
+#             (User.is_active == True)
+#         )
+#     )
+
+#     users = result.scalars().all()
+#     if not users:
+#         return None
+
+#     for role in ["director", "manager", "admin"]:
+#         for user in users:
+#             if user.role == role:
+#                 return user
+
+#     return users[0]
+ 
+
+async def authenticate_user(db, password, branch_id=None, username=None):
+    print(f"AUTH: branch_id={branch_id!r} username={username!r} pwd={password!r}")
+
+    # 1. ADMIN
     if branch_id == 0 or username:
-        # Bazadan barcha faol adminlarni yuklab olamiz
+        print("AUTH: -> ADMIN yo'li")
         stmt = select(User).options(selectinload(User.branch)).where(
             (User.role == "admin") & (User.is_active == True)
         )
-        result = await db.execute(stmt)
-        admins = result.scalars().all()
-
-        # Har bir adminning parolini kiritilgan parol bilan solishtiramiz
+        admins = (await db.execute(stmt)).scalars().all()
+        print(f"AUTH: faol admin soni = {len(admins)}")
         for admin in admins:
-            if verify_password(password, admin.hashed_password):
-                return admin  # To'g'ri kelgan birinchi adminni (Sardor, Anton yoki Asliddin) qaytaramiz
-        
-        return None  # Hech biri to'g'ri kelmasa
-
-    # 2. DIRECTOR / MANAGER LOGINI (Branch bo'yicha)
-    if branch_id is None:
+            print(f"AUTH: admin id={admin.id} hash_bor={bool(admin.hashed_password)}")
+            if admin.hashed_password and verify_password(password, admin.hashed_password):
+                print(f"AUTH: parol mos -> admin {admin.id}")
+                return admin
+        print("AUTH: hech bir admin paroli mos kelmadi -> None")
         return None
 
-    expected_password = get_branch_password(branch_id)
-    if expected_password is None or password != expected_password:
+    # 2. DIRECTOR / MANAGER
+    if branch_id is None:
+        print("AUTH: branch_id=None va username yo'q -> None")
+        return None
+
+    expected = get_branch_password(branch_id)
+    print(f"AUTH: branch {branch_id} kutilgan_parol={expected!r} kiritilgan={password!r}")
+    if expected is None or password != expected:
+        print("AUTH: branch paroli mos kelmadi -> None")
         return None
 
     result = await db.execute(
-        select(User)
-        .options(selectinload(User.branch))
-        .where(
+        select(User).options(selectinload(User.branch)).where(
             (User.branch_id == branch_id) &
             (User.role.in_(["director", "manager", "admin"])) &
             (User.is_active == True)
         )
     )
-
     users = result.scalars().all()
+    print(f"AUTH: branch {branch_id} dagi mos foydalanuvchilar = {len(users)}")
     if not users:
+        print("AUTH: bu branch'da mos foydalanuvchi yo'q -> None")
         return None
 
     for role in ["director", "manager", "admin"]:
         for user in users:
             if user.role == role:
                 return user
-
     return users[0]
- 
-
 
 async def change_password_service(user, data, db):
     if not verify_password(data.old_password, user.hashed_password):

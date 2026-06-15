@@ -8,17 +8,7 @@ from app.core.config import (
     WORKLY_ACCESS_TOKEN,
     WORKLY_REFRESH_TOKEN,
 )
-
-
-# async def request_workly_token(data: dict[str, str]) -> str:
-#     url = f"{WORKLY_BASE_URL}"
-
-#     async with httpx.AsyncClient() as client:
-#         response = await client.post(url, data=data, timeout=60)
-
-#     response.raise_for_status()
-#     token_data = response.json()
-#     return token_data["access_token"]
+ 
 
 async def request_workly_token(data: dict[str, str]) -> str:
     url = f"{WORKLY_BASE_URL}/v1/oauth/token"
@@ -39,12 +29,12 @@ async def request_workly_token(data: dict[str, str]) -> str:
 
 
 async def get_workly_token():
-    print("CREDS CHECK:",
-          "username=", bool(WORKLY_USERNAME),
-          "password=", bool(WORKLY_PASSWORD),
-          "refresh=", bool(WORKLY_REFRESH_TOKEN),
-          "client_id=", bool(WORKLY_CLIENT_ID),
-          "client_secret=", bool(WORKLY_CLIENT_SECRET))
+    # print("CREDS CHECK:",
+    #       "username=", bool(WORKLY_USERNAME),
+    #       "password=", bool(WORKLY_PASSWORD),
+    #       "refresh=", bool(WORKLY_REFRESH_TOKEN),
+    #       "client_id=", bool(WORKLY_CLIENT_ID),
+    #       "client_secret=", bool(WORKLY_CLIENT_SECRET))
     # Try password grant first (most reliable for user credentials)
     if WORKLY_USERNAME and WORKLY_PASSWORD:
         data = {
@@ -121,7 +111,10 @@ async def get_workly_employees():
                 timeout=60,
             )
 
-            if response.status_code == 401:
+            print("TOKEN STATUS:", response.status_code)
+            if response.status_code != 200:
+                print("TOKEN ERROR:", response.text)   # faqat xato bo'lsa, token kelmaydi
+            # print("TOKEN RESPONSE:", response.text)  # ← bu qatorni o'chiring
                 token = await get_workly_token()
                 headers["Authorization"] = f"Bearer {token}"
                 response = await client.get(

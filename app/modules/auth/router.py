@@ -49,37 +49,7 @@ async def login_swagger(
     }
 
 
-
-# @router.post("/login", response_model=LoginResponse)
-# async def login(
-#     payload: LoginRequest,
-#     db: AsyncSession = Depends(get_db),
-# ):
-#     """
-#     Directorlar uchun: Password + branch_id bilan login qilish.
-#     """
-#     user = await authenticate_user(
-#         db=db,
-#         password=payload.password,
-#         branch_id=payload.branch_id,
-#     )
-
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Invalid credentials or branch")
-
-#     token = create_access_token({"sub": str(user.id)})
-
-#     return {
-#         "access_token": token,
-#         "token_type": "bearer",
-#         "user": {
-#             "id": user.id,
-#             "full_name": user.full_name,
-#             "role": user.role,
-#             "branch_id": user.branch_id,
-#             "branch_name": user.branch.name if user.branch else None,
-#         }
-#     }
+ 
 
 
 @router.post("/login", response_model=LoginResponse)
